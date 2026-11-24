@@ -1,0 +1,62 @@
+[project]
+name = "seizu-bedrock-sandbox-image"
+version = "0.0.0"
+description = "A seizu-sandbox/1 container image for Amazon Bedrock AgentCore Runtime"
+license = "Apache-2.0"
+# The image's interpreter; keep in step with the Dockerfile's base image.
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[dependency-groups]
+# What sandboxed code can import. Installed into the image, hash-checked, from
+# uv.lock. The protocol requires at least pandas, numpy, matplotlib, requests
+# and pyyaml.
+sandbox = [
+    "matplotlib",
+    "numpy",
+    "openpyxl",
+    "pandas",
+    "pyyaml",
+    "requests",
+    "scipy",
+    "tabulate",
+]
+dev = [
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-timeout",
+    "ruff",
+]
+
+[tool.uv]
+package = false
+default-groups = ["dev"]
+# Resolve only to releases at least a week old. To take an urgent fix sooner,
+# exempt that one package with
+# `exclude-newer-package = { <name> = "<RFC 3339 timestamp>" }`.
+exclude-newer = "7 days"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = ["conformance"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "S", "BLE", "A", "N"]
+ignore = ["E203", "E701"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["sandbox", "tests", "scripts"]
+mypy_path = ["sandbox", "conformance"]
+
+[tool.pytest.ini_options]
+pythonpath = ["sandbox", "conformance"]
+testpaths = ["tests"]
+timeout = 120
+addopts = "--strict-markers"
