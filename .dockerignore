@@ -1,0 +1,6 @@
+# Only what the Dockerfile copies or mounts.
+*
+!pyproject.toml
+!uv.lock
+!sandbox/server.py
+!sandbox/kernel.py

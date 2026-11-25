@@ -1,0 +1,4 @@
+repository: https://github.com/mappedsky/seizu
+commit: unreleased (branch bedrock-sandbox-provider, before merge)
+sandbox_image_conformance.py: scripts/sandbox_image_conformance.py
+sandbox-protocol-v1.json: schema/sandbox-protocol-v1.json
