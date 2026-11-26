@@ -121,7 +121,9 @@ def storage_semantics(config: Config) -> str:
             continue
         mount_point = _unescape_mountinfo(fields[4])
         inside = target == mount_point or target.startswith(mount_point.rstrip("/") + "/")
-        if not inside or len(mount_point) <= best[0]:
+        # The deepest mount point covers the workspace; of mounts stacked on the
+        # same point, the later line is the one on top.
+        if not inside or len(mount_point) < best[0]:
             continue
         fstype, source = rest[0].lower(), rest[1].lower()
         semantics = "object" if "s3" in fstype or "mountpoint-s3" in source else "posix"
