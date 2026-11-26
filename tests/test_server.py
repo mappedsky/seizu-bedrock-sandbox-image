@@ -258,6 +258,22 @@ def test_a_nested_posix_mount_wins_over_an_outer_s3_one(tmp_path: Path) -> None:
     assert storage_semantics(Config(workspace=ws, mountinfo=mounts)) == "posix"
 
 
+@pytest.mark.parametrize(
+    ("lower", "upper", "expected"),
+    [
+        # What AgentCore's S3 bucket mount looks like: fuse over the image's own directory.
+        ("253:32 / {ws} rw,relatime - ext4 /dev/vdc rw", "0:47 / {ws} rw,nosuid - fuse mountpoint-s3 rw", "object"),
+        ("0:47 / {ws} rw,nosuid - fuse mountpoint-s3 rw", "253:32 / {ws} rw,relatime - ext4 /dev/vdc rw", "posix"),
+    ],
+)
+def test_the_top_of_mounts_stacked_on_the_workspace_wins(tmp_path: Path, lower: str, upper: str, expected: str) -> None:
+    ws = tmp_path / "workspace"
+    ws.mkdir()
+    real = os.path.realpath(ws)
+    mounts = _mountinfo(tmp_path, ROOT, "404 22 " + lower.format(ws=real), "357 404 " + upper.format(ws=real))
+    assert storage_semantics(Config(workspace=ws, mountinfo=mounts)) == expected
+
+
 def test_storage_semantics_override_and_unreadable_mountinfo(tmp_path: Path) -> None:
     assert storage_semantics(Config(storage_semantics="object", mountinfo=tmp_path / "missing")) == "object"
     assert storage_semantics(Config(mountinfo=tmp_path / "missing")) == "posix"
